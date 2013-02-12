@@ -2,6 +2,7 @@ package com.bookshelf;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,13 +25,12 @@ public class BookConverter {
 	public List<Column> book2row(Book newBook) throws IOException{
 		
 		List<Column> cols = new ArrayList<Column>();
-		cols.add(formColumn("id",ByteBuffer.allocate(4).putInt(newBook.getId())));
+		cols.add(formColumn("id",ByteBuffer.allocate(4).wrap(Integer.valueOf(newBook.getId()).toString().getBytes("UTF-8"))));
 		cols.add(formColumn("title",ByteBuffer.wrap(newBook.getTitle().getBytes("UTF-8"))));
 		cols.add(formColumn("author",ByteBuffer.wrap(newBook.getAuthor().getBytes("UTF-8"))));
 		cols.add(formColumn("genre",ByteBuffer.wrap(newBook.getGenre().getBytes("UTF-8"))));
 		byte[] toWrap = new byte[newBook.getText().available()];newBook.getText().read(toWrap);
 		cols.add(formColumn("text",ByteBuffer.wrap(toWrap)));
-		
 		return cols;
 	}
 	
@@ -40,9 +40,8 @@ public class BookConverter {
 		
 		for(Column col: book){
 			if(new String(col.getName()).equals("id")){
-				ByteBuffer buf = ByteBuffer.allocate(4).wrap(col.getValue());
-				buf.flip();
-				newBook.setId( buf.getInt() );
+				
+				newBook.setId(Integer.parseInt(new String(col.getValue())));
 			}
 			
 			if(new String(col.getName()).equals("title")){
@@ -62,7 +61,8 @@ public class BookConverter {
 			
 			if(new String(col.getName()).equals("text")){
 				
-				newBook.setText(new ByteArrayInputStream(col.getValue()));
+				InputStream is = new ByteArrayInputStream(col.getValue());
+				newBook.setText(is);
 			}
 		}
 		return newBook;

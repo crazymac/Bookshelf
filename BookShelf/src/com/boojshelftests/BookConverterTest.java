@@ -1,18 +1,43 @@
 package com.boojshelftests;
 
+import static org.junit.Assert.*;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 
+import org.apache.cassandra.thrift.Column;
 import org.junit.Test;
 
 import com.bookshelf.Book;
+import com.bookshelf.BookConverter;
 
 public class BookConverterTest {
 
-	@Test
-	public void converterTest() throws FileNotFoundException{
+	public Book beggining_state;
+	public Book final_state;
+	public List<Column> rowBook;
+	
+	public void setUp() throws FileNotFoundException {
 		
-		Book book = Book.getInstance();
-		book.newBook(1, "CassandraTest", "Test", "Tester", new FileInputStream("resources/testbook"));
+		beggining_state = Book.getInstance();
+		final_state = Book.getInstance();
+		beggining_state.newBook(117, "CassandraTest", "Test", "Tester", new FileInputStream("resources/testbook"));
+		rowBook = new ArrayList<Column>();
+		
 	}
+	
+	@Test
+	public void book2rowConverterTest() throws IOException{
+		
+		setUp();
+		rowBook = BookConverter.getInstance().book2row(beggining_state);
+		assertNotNull(rowBook);
+		System.out.println(beggining_state.toString());
+		final_state = BookConverter.getInstance().row2book(rowBook);
+		System.out.println(final_state.toString());
+		assertEquals(beggining_state, final_state);
+	}
+	
 }

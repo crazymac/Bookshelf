@@ -37,7 +37,7 @@ public class BookConverterTest {
 		System.out.println(beggining_state.toString());
 		final_state = BookConverter.getInstance().row2book(rowBook);
 		System.out.println(final_state.toString());
-		assertEquals(beggining_state, final_state);
+		assertTrue(beggining_state.toString().equals(final_state.toString()));
 	}
 	
 }

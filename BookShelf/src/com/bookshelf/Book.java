@@ -1,5 +1,6 @@
 package com.bookshelf;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class Book {
@@ -14,10 +15,11 @@ public class Book {
 		return BookHolder.newInstanceHolder;
 	}
 	
-	@Override
-	public String toString(){
+	public String getReadbleText() throws IOException{
 		
-		return new String("Book id:" + getId() + " |Book Title:" + getTitle() + " |Book Author:" + getAuthor() + " |Book text:" + getText().getClass().getSimpleName());
+		byte[] newText = new byte[this.text.available()];
+		this.text.read(newText);
+		return new String(newText);
 	}
 	
 	public void newBook(int id, String title, String author, String genre, InputStream text){

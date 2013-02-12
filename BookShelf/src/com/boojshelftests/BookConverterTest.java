@@ -27,17 +27,14 @@ public class BookConverterTest {
 		rowBook = new ArrayList<Column>();
 		
 	}
-	
+
 	@Test
-	public void book2rowConverterTest() throws IOException{
+	public void book2row2bookConverterTest() throws IOException{
 		
 		setUp();
 		rowBook = BookConverter.getInstance().book2row(beggining_state);
-		assertNotNull(rowBook);
-		System.out.println(beggining_state.toString());
 		final_state = BookConverter.getInstance().row2book(rowBook);
-		System.out.println(final_state.toString());
-		assertTrue(beggining_state.toString().equals(final_state.toString()));
+		assertEquals(beggining_state, final_state);
 	}
 	
 }

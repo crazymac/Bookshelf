@@ -3,22 +3,20 @@ package com.bookshelf;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
@@ -29,10 +27,10 @@ public class DAOImpl implements DAO{
 
 	private Connector conn;
 	private Cassandra.Client client;
-	public String bookKeySpace;
-	public String bookColumnFamily;
-	private CfDef bookCF;
-	private KsDef bookKs;
+	private String bookKeySpace = "BOOKKEYSPACE";
+	private String bookColumnFamily = "BOOKS";
+	
+	
 	private static final Logger LOG = Logger.getLogger(DAOImpl.class);
 	
 	private static class DAOImplHolder{
@@ -44,64 +42,19 @@ public class DAOImpl implements DAO{
 		
 		return DAOImplHolder.newInstanceHolder;
 	}
-	
-	
+		
 	
 	public Cassandra.Client connClient(String HP) throws Exception, Throwable{
 
-		HostPort.getInstance().hostPort = new String(HP);
+		BasicConfigurator.configure();
+		HostPort hp = HostPort.getInstance();
+		hp.hostPort = new String(HP);
 		conn = Connector.getInstance();
 		LOG.debug("["+new Date()+"] - Connection was established");
-		this.client = conn.establishClient();
+		this.client = new Cassandra.Client(conn.getConnection(hp));
 		LOG.debug("["+new Date()+"] - Client was connected");
+		
 		return this.client;	
-	}
-	
-	public void setEmptyKeyspace(){
-		
-		SchemaHandler SH = SchemaHandler.getInstance();
-		if(SH.ksCheck(this.client, bookKeySpace) == true){
-			//bookKeySpace = keySpace;
-			this.bookKs = SH.createKeySpace(bookKeySpace);
-		}
-		else{
-			this.bookKs = SH.createKeySpace(bookKeySpace);
-			//bookKeySpace = keySpace;
-		}
-	}
-
-	public void setEmptyColumnFamily(){
-		
-		SchemaHandler SH = SchemaHandler.getInstance();
-		try {
-			this.client.set_keyspace(bookKeySpace);
-			if(SH.cfCheck(this.client, bookColumnFamily) == true){
-				this.bookCF = SH.createColumnFamily( bookColumnFamily, bookKeySpace);
-				//bookColumnFamily = columnFamily;
-			}
-			else{
-				
-				this.bookCF = SH.createColumnFamily(bookColumnFamily, bookKeySpace);
-				//bookColumnFamily = columnFamily;
-			}
-		}catch (InvalidRequestException | TException e) {
-			LOG.debug("["+new Date()+"] - Inavalid request exception on navigating to Ks. RunTime Error MSG:" + e.getMessage());}
-	}
-	
-	public void fillKeySpace(){
-		
-		try {
-			setEmptyKeyspace();
-			setEmptyColumnFamily();
-			List<CfDef> defs = new ArrayList<CfDef>();
-			defs.add(this.bookCF);
-			this.bookKs.setCf_defs(defs);
-			this.client.system_add_keyspace(this.bookKs);
-			
-		} catch (InvalidRequestException | SchemaDisagreementException
-				| TException e) {
-			LOG.debug("["+new Date()+"] - Inavalid request exception on filling new Ks. RunTime Error MSG:" + e.getMessage());
-		}
 	}
 	
 	@Override
@@ -189,5 +142,11 @@ public class DAOImpl implements DAO{
 		else
 			LOG.debug("["+new Date()+"] - Exception while closing connection.");
 	}
-
+	
+	public void initCassandraSchema(){
+		
+		SchemaHandler.getInstance().createNewSchema(this.client, this.bookKeySpace);
+		SchemaHandler.getInstance().addCf2Ks(this.client, this.bookColumnFamily, this.bookKeySpace);
+	}
+	
 }

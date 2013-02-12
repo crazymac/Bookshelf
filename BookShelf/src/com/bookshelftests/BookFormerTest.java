@@ -1,4 +1,4 @@
-package com.boojshelftests;
+package com.bookshelftests;
 
 import static org.junit.Assert.*;
 

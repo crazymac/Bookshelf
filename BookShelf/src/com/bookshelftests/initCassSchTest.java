@@ -1,4 +1,4 @@
-package com.boojshelftests;
+package com.bookshelftests;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.log4j.BasicConfigurator;

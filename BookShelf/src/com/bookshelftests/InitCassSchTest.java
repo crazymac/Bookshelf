@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.bookshelf.DAOImpl;
 
-public class initCassSchTest {
+public class InitCassSchTest {
 
 	@Test
 	public void testIt() throws Exception, Throwable{

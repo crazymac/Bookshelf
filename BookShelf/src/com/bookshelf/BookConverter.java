@@ -78,5 +78,11 @@ public class BookConverter {
 		return temp;
 	}
 	
+	public List<String> getBookTokens(){
+		
+		List<String> book = new ArrayList<String>();
+		book.add("id");book.add("title");book.add("author");book.add("genre");book.add("text");
+		return book;
+	}
 	
 }

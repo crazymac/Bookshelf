@@ -80,11 +80,28 @@ public class DAOImpl implements DAO{
 	@Override
 	public int delBook(int id) throws DAOException {
 		
-		ColumnPath path = new ColumnPath();
-		path.column_family = this.bookColumnFamily;
 		try {
 			this.client = connClient();
+			ColumnPath path = new ColumnPath();
+			path.column_family = this.bookColumnFamily;
+			for(String token: BookConverter.getInstance().getBookTokens()){
+				path.column = ByteBuffer.wrap(token.getBytes("UTF-8"));
+				this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
+			}
+			/*path.column = ByteBuffer.wrap("id".getBytes("UTF-8"));
 			this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
+			
+			path.column = ByteBuffer.wrap("title".getBytes("UTF-8"));
+			this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
+			
+			path.column = ByteBuffer.wrap("author".getBytes("UTF-8"));
+			this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
+			
+			path.column = ByteBuffer.wrap("genre".getBytes("UTF-8"));
+			this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
+			
+			path.column = ByteBuffer.wrap("text".getBytes("UTF-8"));*/
+			
 		} catch (UnsupportedEncodingException | InvalidRequestException
 				| UnavailableException | TimedOutException | TException e) {
 			LOG.debug("["+new Date()+"] - RunTime Exception occured. RunTime Exception MSG:" + e.getMessage());

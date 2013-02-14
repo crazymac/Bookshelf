@@ -63,22 +63,16 @@ public class DAOImpl implements DAO{
 				
 		try {
 			this.client = connClient();
-			System.out.println("Cleint connected");
 			this.client.set_keyspace(this.bookKeySpace);
-			System.out.println("KeySpace setted");
 			ColumnParent parent = new ColumnParent(this.bookColumnFamily);
-			System.out.println("CF setted");
-			
-			for(Column col:BookConverter.getInstance().book2row(book))
-			{
-				this.client.insert(ByteBuffer.wrap(((String.valueOf(book.getId())).getBytes("UTF-8"))), parent, col, ConsistencyLevel.ONE);
-				System.out.println("Column " + new String(col.getName()) + " added");
-			}
+			byte[] id = (String.valueOf(book.getId())).getBytes("UTF-8");
+			List<Column> rowBook = BookConverter.getInstance().book2row(book);
+			for(Column col: rowBook)
+				this.client.insert(ByteBuffer.wrap(id), parent, col, ConsistencyLevel.ONE);
 			System.out.println("Book added");
 			LOG.debug("["+new Date()+"] - Book: "+ book.getTitle()+" with id:"+book.getId()+" was added");
-			this.conn.closeConnection(); 
 		} catch (Throwable e) {
-			LOG.debug("["+new Date()+"] - RunTime Exception on addBook(Book book) "+e.getMessage());
+			e.printStackTrace();
 		}
 		return -1;
 	}

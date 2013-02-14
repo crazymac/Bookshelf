@@ -66,9 +66,9 @@ public class SchemaHandler {
 		
 		KsDef newKs = new KsDef();
 		newKs.setName(ksName);
-		newKs.setReplication_factor(1);
+		newKs.setReplication_factor(3);
 		newKs.setStrategy_class("org.apache.cassandra.locator.NetworkTopologyStrategy");
-		
+
 		return newKs;
 	}
 	

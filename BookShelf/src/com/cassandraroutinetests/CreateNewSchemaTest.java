@@ -14,7 +14,7 @@ public class CreateNewSchemaTest {
 		
 		BasicConfigurator.configure();
 		DAOImpl a = DAOImpl.getInstance();
-		Cassandra.Client cl = a.connClient("localhost:9160");
+		Cassandra.Client cl = a.connClient();
 		SchemaHandler.getInstance().createNewSchema(cl, "bookKeySpace");
 		SchemaHandler.getInstance().addCf2Ks(cl, "bookColumnFamily", "bookKeySpace");
 		cl.system_drop_keyspace("bookKeySpace");

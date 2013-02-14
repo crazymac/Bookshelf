@@ -1,7 +1,6 @@
 package com.bookshelftests;
 
 import static org.junit.Assert.*;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,5 +35,4 @@ public class BookConverterTest {
 		final_state = BookConverter.getInstance().row2book(rowBook);
 		assertEquals(beggining_state, final_state);
 	}
-	
 }

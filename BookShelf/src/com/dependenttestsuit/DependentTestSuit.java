@@ -14,6 +14,4 @@ import com.cassandraroutinetests.TestKsCheck;
 @RunWith(Suite.class)
 @SuiteClasses({DAOConnTest.class, InitCassSchTest.class, CfTests.class, 
 	TestConnectivity.class, TestKsCheck.class, CreateNewSchemaTest.class})
-public class DependentTestSuit {
-
-}
+public class DependentTestSuit {}

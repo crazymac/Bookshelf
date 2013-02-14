@@ -29,6 +29,7 @@ public class DAOImpl implements DAO{
 	private Cassandra.Client client;
 	private String bookKeySpace = "BOOKKEYSPACE";
 	private String bookColumnFamily = "BOOKS";
+	private String hostPort = "localhost:9160";
 	
 	
 	private static final Logger LOG = Logger.getLogger(DAOImpl.class);
@@ -44,11 +45,11 @@ public class DAOImpl implements DAO{
 	}
 		
 	
-	public Cassandra.Client connClient(String HP) throws Exception, Throwable{
+	public Cassandra.Client connClient() throws Exception, Throwable{
 
 		BasicConfigurator.configure();
 		HostPort hp = HostPort.getInstance();
-		hp.hostPort = new String(HP);
+		hp.hostPort = new String(this.hostPort);
 		conn = Connector.getInstance();
 		LOG.debug("["+new Date()+"] - Connection was established");
 		this.client = new Cassandra.Client(conn.getConnection(hp));
@@ -61,34 +62,41 @@ public class DAOImpl implements DAO{
 	public int addBook(Book book) throws DAOException {
 				
 		try {
-			this.client.set_keyspace(bookKeySpace);
-		} catch (InvalidRequestException | TException e) {
-			LOG.debug("["+new Date()+"] - Exception occured! RunTime Error MSG"+e.getMessage());}
-		
-		ColumnParent parent = new ColumnParent(bookColumnFamily);
-		try {
+			this.client = connClient();
+			System.out.println("Cleint connected");
+			this.client.set_keyspace(this.bookKeySpace);
+			System.out.println("KeySpace setted");
+			ColumnParent parent = new ColumnParent(this.bookColumnFamily);
+			System.out.println("CF setted");
+			
 			for(Column col:BookConverter.getInstance().book2row(book))
+			{
 				this.client.insert(ByteBuffer.wrap(((String.valueOf(book.getId())).getBytes("UTF-8"))), parent, col, ConsistencyLevel.ONE);
-		} catch (IOException | InvalidRequestException | UnavailableException
-				| TimedOutException | TException e) {
-			LOG.debug("["+new Date()+"] - Exception occured! Fail"+e.getMessage());
+				System.out.println("Column " + new String(col.getName()) + " added");
+			}
+			System.out.println("Book added");
+			LOG.debug("["+new Date()+"] - Book: "+ book.getTitle()+" with id:"+book.getId()+" was added");
+			this.conn.closeConnection(); 
+		} catch (Throwable e) {
+			LOG.debug("["+new Date()+"] - RunTime Exception on addBook(Book book) "+e.getMessage());
 		}
-		LOG.debug("["+new Date()+"] - Book: "+ book.getTitle()+" with id:"+book.getId()+" was added");
-		return book.getId();
+		return -1;
 	}
 	
 	@Override
 	public int delBook(int id) throws DAOException {
 		
 		ColumnPath path = new ColumnPath();
-		path.column_family = bookColumnFamily;
+		path.column_family = this.bookColumnFamily;
 		try {
+			this.client = connClient();
 			this.client.remove(ByteBuffer.wrap(((String.valueOf(id)).getBytes("UTF-8"))),path, System.currentTimeMillis(),ConsistencyLevel.ONE);
 		} catch (UnsupportedEncodingException | InvalidRequestException
 				| UnavailableException | TimedOutException | TException e) {
 			LOG.debug("["+new Date()+"] - RunTime Exception occured. RunTime Exception MSG:" + e.getMessage());
-		}
+		} catch (Exception e) {} catch (Throwable e) {}
 		LOG.debug("["+new Date()+"] - Book with id:"+id+" was deleted");
+		this.conn.closeConnection();
 		return id;
 	}
 
@@ -145,8 +153,14 @@ public class DAOImpl implements DAO{
 	
 	public void initCassandraSchema(){
 		
-		SchemaHandler.getInstance().createNewSchema(this.client, this.bookKeySpace);
-		SchemaHandler.getInstance().addCf2Ks(this.client, this.bookColumnFamily, this.bookKeySpace);
+		try {
+			this.client = connClient();
+			SchemaHandler.getInstance().createNewSchema(this.client, this.bookKeySpace);
+			SchemaHandler.getInstance().addCf2Ks(this.client, this.bookColumnFamily, this.bookKeySpace);
+		} catch (Throwable e) {
+			LOG.debug("["+new Date()+"] - RunTime Exception on schema creating func void initCassandraSchema(). RunTime Exception MSG:" + e.getMessage());
+		}
+
 	}
 	
 }

@@ -13,7 +13,7 @@ public class InitCassSchTest {
 		
 		BasicConfigurator.configure();
 		DAOImpl a = DAOImpl.getInstance();
-		Cassandra.Client cl = a.connClient("localhost:9160");
+		Cassandra.Client cl = a.connClient();
 		a.initCassandraSchema();
 		cl.system_drop_keyspace("BOOKKEYSPACE");
 	}

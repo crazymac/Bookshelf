@@ -6,6 +6,7 @@ import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
@@ -66,7 +67,7 @@ public class SchemaHandler {
 		
 		KsDef newKs = new KsDef();
 		newKs.setName(ksName);
-		newKs.setReplication_factor(3);
+		newKs.setReplication_factor(1);
 		newKs.setStrategy_class("org.apache.cassandra.locator.NetworkTopologyStrategy");
 
 		return newKs;
@@ -93,21 +94,19 @@ public class SchemaHandler {
 		}
 	}
 	
-	public void addCf2Ks(Cassandra.Client cl, String newCfName, String existedKs){
+	public void addCfs2Ks(Cassandra.Client cl, String newCf, String existedKs){
 		
-		List<CfDef> newCFs = new ArrayList<CfDef>();
-		newCFs.add(createColumnFamily(newCfName, existedKs));
+		
 		try {
 			cl.set_keyspace(existedKs);
-			for(CfDef newCF: newCFs){
-				
-				cl.system_add_column_family(newCF);
-			}
-		} catch (InvalidRequestException | TException e) {
+			cl.system_add_column_family(createColumnFamily(newCf, existedKs));
+		}
+		catch (InvalidRequestException | TException e) {
 			LOG.debug("["+new Date()+"] - Inavalid request exception on navigating to Ks. RunTime Error MSG:" + e.getMessage());}
 		catch (SchemaDisagreementException e) {
 			LOG.debug("["+new Date()+"] - Inavalid request exception on adding new345 CFs to Ks. RunTime Error MSG:" + e.getMessage());}
 	}
-		
 }
+		
+
 

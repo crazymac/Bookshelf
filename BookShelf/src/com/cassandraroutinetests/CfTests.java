@@ -23,7 +23,7 @@ public class CfTests {
 		hp.hostPort = new String("localhost:9160");
 		Cassandra.Client cl = new Cassandra.Client(Connector.getInstance().getConnection(hp));
 		SchemaHandler.getInstance().createNewSchema(cl, "NEW");
-		SchemaHandler.getInstance().addCf2Ks(cl, "cf", "NEW");
+		SchemaHandler.getInstance().addCfs2Ks(cl, "cf", "NEW");
 		
 		assertTrue(SchemaHandler.getInstance().cfCheck(cl, "cf"));		
 		cl.system_drop_keyspace("NEW");

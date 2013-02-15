@@ -13,10 +13,12 @@ public class CreateNewSchemaTest {
 	public void createNewSchemaTest() throws Exception, Throwable{
 		
 		BasicConfigurator.configure();
+		SchemaHandler sh = SchemaHandler.getInstance();
 		DAOImpl a = DAOImpl.getInstance();
 		Cassandra.Client cl = a.connClient();
-		SchemaHandler.getInstance().createNewSchema(cl, "bookKeySpace");
-		SchemaHandler.getInstance().addCf2Ks(cl, "bookColumnFamily", "bookKeySpace");
+		sh.createNewSchema(cl, "bookKeySpace");
+		sh.addCfs2Ks(cl, "bookColumnFamily".concat(String.valueOf(1)), "bookKeySpace");
+		sh.addCfs2Ks(cl, "bookColumnFamily".concat(String.valueOf(2)), "bookKeySpace");
 		cl.system_drop_keyspace("bookKeySpace");
 		Connector.getInstance().closeConnection();
 	}

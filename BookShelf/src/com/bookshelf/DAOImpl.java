@@ -167,7 +167,7 @@ public class DAOImpl implements DAO{
 		try {
 			this.client = connClient();
 			SchemaHandler.getInstance().createNewSchema(this.client, this.bookKeySpace);
-			SchemaHandler.getInstance().addCf2Ks(this.client, this.bookColumnFamily, this.bookKeySpace);
+			SchemaHandler.getInstance().addCfs2Ks(this.client, this.bookColumnFamily, this.bookKeySpace);
 		} catch (Throwable e) {
 			LOG.debug("["+new Date()+"] - RunTime Exception on schema creating func void initCassandraSchema(). RunTime Exception MSG:" + e.getMessage());
 		}

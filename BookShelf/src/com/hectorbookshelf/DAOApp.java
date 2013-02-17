@@ -8,28 +8,20 @@ import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+@SuppressWarnings("unchecked")
 
 public class DAOApp implements DAO{
 
-	private static class DAOAppHolder{
-		
-		private static final DAOApp newInstanceHolder = new DAOApp();
-	}
-	
-	public static DAOApp getInstance(){
-		
-		return DAOAppHolder.newInstanceHolder;
-	}
-	
 	private Cluster clstr;
 	private Keyspace ksOper;
 	
-	private DAOApp(){
+	public DAOApp(){
 		
-		clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOSTPORT_DEF);
+		clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
 		
 		BasicKeyspaceDefinition KsDef = new BasicKeyspaceDefinition();
 		KsDef.setName(Constants.KEYSPACE_NAME);
@@ -44,20 +36,16 @@ public class DAOApp implements DAO{
         columnFamilyDefinition.setName(Constants.CF_NAME);
         clstr.addColumnFamily(columnFamilyDefinition);
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	@Override
 	public int addBook(Book book) throws DAOException {
 		
 		try{
-			Mutator<String> intMut = HFactory.createMutator(ksOper, StringSerializer.get());
-			intMut.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, HFactory.createColumn("book id", book.getId()));
-			intMut.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, HFactory.createColumn("book title", book.getTitle()));
-			intMut.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, HFactory.createColumn("book author", book.getAuthor()));
-			intMut.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, HFactory.createColumn("book genre", book.getGenre()));
-			byte[] toWrap = new byte[book.getText().available()];book.getText().read(toWrap);
-			intMut.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, HFactory.createColumn("book text", toWrap));
-			
-			clstr.getConnectionManager().shutdown();
+			Mutator<String> mutator = HFactory.createMutator(ksOper, StringSerializer.get());
+			for(HColumn col: BookConverter.getInstance().book2row(book)){
+				mutator.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, col);
+			}
 		}catch (HectorException | IOException e) {
             e.printStackTrace();}
 		return book.getId();
@@ -65,7 +53,8 @@ public class DAOApp implements DAO{
 
 	@Override
 	public int delBook(int id) throws DAOException {
-		// TODO Auto-generated method stub
+		Mutator<String> mutator = HFactory.createMutator(ksOper, StringSerializer.get());
+		mutator.delete("book"+String.valueOf(id), Constants.CF_NAME, null, StringSerializer.get()); ;
 		return 0;
 	}
 

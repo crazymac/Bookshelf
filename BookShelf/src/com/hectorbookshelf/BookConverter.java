@@ -3,13 +3,14 @@ package com.hectorbookshelf;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.factory.HFactory;
+
 import org.apache.cassandra.thrift.Column;
 
-@SuppressWarnings("static-access")
 public class BookConverter {
 
 	private static class BookConverterHolder{
@@ -22,15 +23,18 @@ public class BookConverter {
 		return BookConverterHolder.InstanceHolder;
 	}	
 	
-	public List<Column> book2row(Book newBook) throws IOException{
+	@SuppressWarnings("rawtypes")
+	public List<HColumn> book2row(Book newBook) throws IOException{
 		
-		List<Column> cols = new ArrayList<Column>();
-		cols.add(formColumn("id",ByteBuffer.allocate(4).wrap(Integer.valueOf(newBook.getId()).toString().getBytes("UTF-8"))));
-		cols.add(formColumn("title",ByteBuffer.wrap(newBook.getTitle().getBytes("UTF-8"))));
-		cols.add(formColumn("author",ByteBuffer.wrap(newBook.getAuthor().getBytes("UTF-8"))));
-		cols.add(formColumn("genre",ByteBuffer.wrap(newBook.getGenre().getBytes("UTF-8"))));
+		List<HColumn> cols = new ArrayList<HColumn>();
+			
+		cols.add(HFactory.createColumn("book id", newBook.getId()));
+		cols.add(HFactory.createColumn("book title", newBook.getTitle()));
+		cols.add(HFactory.createColumn("book author", newBook.getAuthor()));
+		cols.add(HFactory.createColumn("book genre", newBook.getGenre()));
 		byte[] toWrap = new byte[newBook.getText().available()];newBook.getText().read(toWrap);
-		cols.add(formColumn("text",ByteBuffer.wrap(toWrap)));
+		cols.add(HFactory.createColumn("book text", toWrap));
+
 		return cols;
 	}
 	
@@ -66,16 +70,6 @@ public class BookConverter {
 			}
 		}
 		return newBook;
-	}
-	
-	private Column formColumn(String token, ByteBuffer data) 
-			throws UnsupportedEncodingException{
-		
-		Column temp = new Column();
-		temp.setName(ByteBuffer.wrap(token.getBytes("UTF8")));
-		temp.setValue(data);
-		temp.setTimestamp(System.currentTimeMillis());
-		return temp;
 	}
 	
 	public List<String> getBookTokens(){

@@ -15,5 +15,7 @@
 	<classpathentry kind="lib" path="/home/mac/Programming/Java/thrift-0.9.0/build/lib/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="/home/mac/Programming/Java/thrift-0.9.0/build/lib/slf4j-api-1.5.8.jar"/>
 	<classpathentry kind="lib" path="/home/mac/Programming/Java/thrift-0.9.0/build/lib/slf4j-log4j12-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/home/mac/Programming/Java/hector/hector-core-1.1-3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/home/mac/Programming/Java/hector/guava-14.0-rc1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

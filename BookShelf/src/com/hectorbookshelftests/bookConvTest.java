@@ -17,8 +17,8 @@ public class bookConvTest {
 	
 	public void setUp(){
 		
-		bstate = Book.getInstance();
-		fstate = Book.getInstance();
+		bstate = new Book();
+		fstate = new Book();
 		cols = new ArrayList<HColumn<String, String>>();
 	}
 	
@@ -28,8 +28,6 @@ public class bookConvTest {
 		try {
 			setUp();
 			bstate.newBook(117, "CassandraTest", "Test", "Tester", new FileInputStream("resources/testbook"));
-			
-			
 			cols = BookConverter.getInstance().book2row(bstate);
 			Assert.assertNotNull(cols);
 			
@@ -43,9 +41,11 @@ public class bookConvTest {
 		setUp();
 		try {
 			bstate.newBook(117, "CassandraTest", "Test", "Tester", new FileInputStream("resources/testbook"));
-			
 			cols = BookConverter.getInstance().book2row(bstate);
 			fstate = BookConverter.getInstance().row2book(cols);
+			
+			System.out.println(bstate.getId() + bstate.getTitle() + bstate.getAuthor() + bstate.getGenre() + bstate.getText());
+			System.out.println(fstate.getId() + fstate.getTitle() + fstate.getAuthor() + fstate.getGenre() + fstate.getText());
 			Assert.assertTrue(bstate.equals(fstate));
 		} catch (Exception e) {
 			e.printStackTrace();

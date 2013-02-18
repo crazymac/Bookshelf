@@ -13,16 +13,14 @@ import com.hectorbookshelf.DAOException;
 
 public class AddBookTest {
 	
+	@SuppressWarnings("unused")
 	@Test
 	public void addBookTest(){
 		
 		BasicConfigurator.configure();
 		Cluster clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
-		if( !clstr.describeKeyspace(Constants.KEYSPACE_NAME).equals(null)){
-			clstr.dropKeyspace(Constants.KEYSPACE_NAME);
-		}
 		DAOApp dao = new DAOApp();
-		Book beggining_state = Book.getInstance();
+		Book beggining_state = new Book();
 		try {
 			beggining_state.newBook(117, "CassandraTest", "Test", "Tester", new FileInputStream("resources/testbook"));
 			dao.addBook(beggining_state);

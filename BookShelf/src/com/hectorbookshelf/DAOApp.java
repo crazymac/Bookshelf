@@ -47,9 +47,8 @@ public class DAOApp implements DAO{
 		
 		try{
 			Mutator<String> mutator = HFactory.createMutator(ksOper, StringSerializer.get());
-			for(HColumn<String, String> col: BookConverter.getInstance().book2row(book)){
-				mutator.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, col);
-			}
+			for(HColumn<String, String> col: BookConverter.getInstance().book2row(book))
+				mutator.insert("book "+ String.valueOf(book.getId()), Constants.CF_NAME, col);
 		}catch (HectorException | IOException e) {
             e.printStackTrace();}
 		return book.getId();
@@ -67,25 +66,18 @@ public class DAOApp implements DAO{
 			throws DAOException {
 		
 		List<Book> pagedBooks = new ArrayList<Book>();
+		
 		RangeSlicesQuery<String, String, String> books = HFactory.createRangeSlicesQuery(ksOper, StringSerializer.get(), StringSerializer.get(), StringSerializer.get()); 
 		books.setColumnFamily(CfDef.getName());
 		books.setKeys("", "");
-		books.setRange("", "", false, 5);
-		if(pageNum == 0)
-			books.setRowCount(pageSize*(pageNum+1));
-		else
-			books.setRowCount(pageSize*pageNum);
+		books.setRange("", "", false, 1000);
+		books.setRowCount(pageSize*pageNum);
 		
 		QueryResult<OrderedRows<String, String, String>> result = books.execute();
         OrderedRows<String, String, String> orderedRows = result.get();
-        
-        for(Row<String, String, String> row:orderedRows.getList().subList(pageSize*(pageNum-1), pageSize*pageNum)){
-        	
-        	List<HColumn<String, String>> bookColumns= row.getColumnSlice().getColumns();
-        	pagedBooks.add(BookConverter.getInstance().row2book(bookColumns));
-        	
-        }
-        
+        for(Row<String, String, String> row:orderedRows.getList()){
+        	pagedBooks.add(BookConverter.getInstance().row2book(row.getColumnSlice().getColumns()));
+        }        
 		return pagedBooks;
 	}
 
@@ -107,8 +99,16 @@ public class DAOApp implements DAO{
 	@Override
 	public List<Book> getBookByText(int pageNum, int pageSize, String text)
 			throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Book> books = getAllBooks(pageNum, pageSize);
+		List<Book> booksByText = new ArrayList<Book>();
+		
+		for(Book book: books){
+			
+			if(book.getAuthor().equals(text)){
+				booksByText.add(book);
+			}
+		}
+		return booksByText;
 	}
 
 	@Override

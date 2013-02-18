@@ -36,29 +36,28 @@ public class BookConverter {
 	
 	public Book row2book(List<HColumn<String, String>> book){
 		
-		Book newBook = Book.getInstance();
+		Book newBook = new Book();
 		for(HColumn<String, String> col: book){
-			if(new String(col.getNameBytes().array()).equals("book id")){
+			if(col.getName().equals("book id")){
 			
-				newBook.setId(Integer.parseInt(new String(col.getValueBytes().array())));			}
+				newBook.setId(Integer.parseInt(col.getValue()));									}
 			
-			if(new String(col.getNameBytes().array()).equals("book title")){
+			if(col.getName().equals("book title")){
 				
-				newBook.setTitle(new String(col.getValueBytes().array()));			}
+				newBook.setTitle(col.getValue());													}
 			
-			if(new String(col.getNameBytes().array()).equals("book author")){
+			if(col.getName().equals("book author")){
 				
-				newBook.setAuthor(new String(col.getValueBytes().array()));			}
+				newBook.setAuthor(col.getValue());													}
 			
-			if(new String(col.getNameBytes().array()).equals("book genre")){
+			if(col.getName().equals("book genre")){
 				
-				newBook.setGenre(new String(col.getValueBytes().array()));			}
+				newBook.setGenre(col.getValue());													}
 			
-			if(new String(col.getNameBytes().array()).equals("book text")){
+			if(col.getName().equals("book text")){
 				
 				InputStream is =new ByteArrayInputStream(col.getValueBytes().array()); 
-				newBook.setText(is);												
-																					}
+				newBook.setText(is);																}
 		}
 		
 		return newBook;

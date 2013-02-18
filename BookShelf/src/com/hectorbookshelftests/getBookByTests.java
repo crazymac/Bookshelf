@@ -4,39 +4,73 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.Assert;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
+
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
+
 import com.hectorbookshelf.Book;
 import com.hectorbookshelf.Constants;
 import com.hectorbookshelf.DAOApp;
 import com.hectorbookshelf.DAOException;
 
-public class getRangedSliceTest {
-
+public class getBookByTests {
+	
+	public Book bstate;
+	public Book fstate;
+	
+	public void setUp(){
+		
+		bstate = new Book();
+		fstate = new Book();
+	}
+	
 	@Test
-	public void getRangedSlicesTest(){
+	public void getBookByTitleTest(){
 		
 		BasicConfigurator.configure();
-		List<Book> before = new ArrayList<Book>();
 		List<Book> after = new ArrayList<Book>();
-		
+		setUp();
 		Cluster clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
+		
 		if(clstr.describeKeyspace(Constants.KEYSPACE_NAME) != null)
 			clstr.dropKeyspace(Constants.KEYSPACE_NAME, true);
+		
 		DAOApp dao = new DAOApp();
-		Book beggining_state = new Book();
 		try {
-			for(int i = 0; i< 40; ++i){
+			for(int i = 0; i< 10; ++i){
 				
-				beggining_state.newBook(i, new String("CassandraTest" + String.valueOf(i)), new String("Test" + String.valueOf(i)), new String("Tester" + String.valueOf(i)), new FileInputStream("resources/testbook"));
-				dao.addBook(beggining_state);
+				bstate.newBook(i, new String("CassandraTest" + String.valueOf(i)), "Test", "Tester", new FileInputStream("resources/testbook"));
+				dao.addBook(bstate);
 			}
-			after = dao.getAllBooks(1, 40);
-			Assert.assertFalse(before.equals(after));
+			after = dao.getBookByTitle(1, 40, new String("CassandraTest" + String.valueOf(5)));
+			
+			for(Book book: after){
+				System.out.println(book.getTitle());
+			}
+
+			clstr.dropKeyspace(Constants.KEYSPACE_NAME);
 		} catch (FileNotFoundException | DAOException e) {e.printStackTrace();}
+		
 	}
+	
+	@Test
+	public void getBookByAuthorTest(){
+		
+		
+	}
+	
+	@Test
+	public void getBookByGenreTest(){
+		
+		
+	}
+	
+	@Test
+	public void getBookByTextTest(){
+		
+		
+	}
+	
 }

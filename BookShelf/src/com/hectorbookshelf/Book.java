@@ -5,16 +5,6 @@ import java.io.InputStream;
 
 public class Book {
 
-	private static class BookHolder{
-		
-		private static final Book newInstanceHolder = new Book();
-	}
-	
-	public static Book getInstance(){
-		
-		return BookHolder.newInstanceHolder;
-	}
-	
 	public String getReadbleText() throws IOException{
 		
 		byte[] newText = new byte[this.text.available()];

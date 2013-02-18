@@ -17,7 +17,6 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
-@SuppressWarnings("unchecked")
 
 public class DAOApp implements DAO{
 
@@ -43,13 +42,12 @@ public class DAOApp implements DAO{
         clstr.addColumnFamily(CfDef);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public int addBook(Book book) throws DAOException {
 		
 		try{
 			Mutator<String> mutator = HFactory.createMutator(ksOper, StringSerializer.get());
-			for(HColumn col: BookConverter.getInstance().book2row(book)){
+			for(HColumn<String, String> col: BookConverter.getInstance().book2row(book)){
 				mutator.insert("book"+ String.valueOf(book.getId()), Constants.CF_NAME, col);
 			}
 		}catch (HectorException | IOException e) {
@@ -94,8 +92,16 @@ public class DAOApp implements DAO{
 	@Override
 	public List<Book> getBookByTitle(int pageNum, int pageSize, String title)
 			throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Book> books = getAllBooks(pageNum, pageSize);
+		List<Book> titledBooks = new ArrayList<Book>();
+		
+		for(Book book: books){
+			
+			if(book.getText().equals(title)){
+				titledBooks.add(book);
+			}
+		}
+		return titledBooks;
 	}
 
 	@Override
@@ -108,15 +114,30 @@ public class DAOApp implements DAO{
 	@Override
 	public List<Book> getBookByAuthor(int pageNum, int pageSize, String author)
 			throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Book> books = getAllBooks(pageNum, pageSize);
+		List<Book> booksByAuthor = new ArrayList<Book>();
+		
+		for(Book book: books){
+			
+			if(book.getAuthor().equals(author)){
+				booksByAuthor.add(book);
+			}
+		}
+		return booksByAuthor;
 	}
 
 	@Override
 	public List<Book> getBookByGenre(int pageNum, int pageSize, String genre)
 			throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Book> books = getAllBooks(pageNum, pageSize);
+		List<Book> booksByGenre = new ArrayList<Book>();
+		
+		for(Book book: books){
+			if(book.getGenre().equals(genre)){
+				booksByGenre.add(book);
+			}
+		}
+		return booksByGenre;
 	}
 
 	@Override

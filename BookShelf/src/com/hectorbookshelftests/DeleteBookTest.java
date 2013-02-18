@@ -21,7 +21,9 @@ public class DeleteBookTest {
 		
 		BasicConfigurator.configure();
 		Cluster clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
-		clstr.dropKeyspace(Constants.KEYSPACE_NAME);
+		if( !clstr.describeKeyspace(Constants.KEYSPACE_NAME).equals(null)){
+			clstr.dropKeyspace(Constants.KEYSPACE_NAME);
+		}
 		DAOApp dao = new DAOApp();
 		Book beggining_state = Book.getInstance();
 		try {

@@ -1,6 +1,7 @@
 package com.hectorbookshelf;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
@@ -9,15 +10,20 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.QueryResult;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 @SuppressWarnings("unchecked")
 
 public class DAOApp implements DAO{
 
 	private Cluster clstr;
 	private Keyspace ksOper;
+	private BasicColumnFamilyDefinition CfDef;
 	
 	public DAOApp(){
 		
@@ -31,10 +37,10 @@ public class DAOApp implements DAO{
 		clstr.addKeyspace(KsDef, true);
 		ksOper = HFactory.createKeyspace(Constants.KEYSPACE_NAME, clstr);
 				
-		BasicColumnFamilyDefinition columnFamilyDefinition = new BasicColumnFamilyDefinition();
-        columnFamilyDefinition.setKeyspaceName(Constants.KEYSPACE_NAME);
-        columnFamilyDefinition.setName(Constants.CF_NAME);
-        clstr.addColumnFamily(columnFamilyDefinition);
+		CfDef = new BasicColumnFamilyDefinition();
+		CfDef.setKeyspaceName(Constants.KEYSPACE_NAME);
+		CfDef.setName(Constants.CF_NAME);
+        clstr.addColumnFamily(CfDef);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -61,8 +67,28 @@ public class DAOApp implements DAO{
 	@Override
 	public List<Book> getAllBooks(int pageNum, int pageSize)
 			throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<Book> pagedBooks = new ArrayList<Book>();
+		RangeSlicesQuery<String, String, String> books = HFactory.createRangeSlicesQuery(ksOper, StringSerializer.get(), StringSerializer.get(), StringSerializer.get()); 
+		books.setColumnFamily(CfDef.getName());
+		books.setKeys("", "");
+		books.setRange("", "", false, 5);
+		if(pageNum == 0)
+			books.setRowCount(pageSize*(pageNum+1));
+		else
+			books.setRowCount(pageSize*pageNum);
+		
+		QueryResult<OrderedRows<String, String, String>> result = books.execute();
+        OrderedRows<String, String, String> orderedRows = result.get();
+        
+        for(Row<String, String, String> row:orderedRows.getList().subList(pageSize*(pageNum-1), pageSize*pageNum)){
+        	
+        	List<HColumn<String, String>> bookColumns= row.getColumnSlice().getColumns();
+        	pagedBooks.add(BookConverter.getInstance().row2book(bookColumns));
+        	
+        }
+        
+		return pagedBooks;
 	}
 
 	@Override

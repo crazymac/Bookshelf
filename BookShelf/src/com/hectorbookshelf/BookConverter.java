@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
-
-import org.apache.cassandra.thrift.Column;
 
 public class BookConverter {
 
@@ -22,61 +19,49 @@ public class BookConverter {
 		
 		return BookConverterHolder.InstanceHolder;
 	}	
-	
-	@SuppressWarnings("rawtypes")
-	public List<HColumn> book2row(Book newBook) throws IOException{
+
+	public List<HColumn<String, String>> book2row(Book newBook) throws IOException{
 		
-		List<HColumn> cols = new ArrayList<HColumn>();
+		List<HColumn<String, String>> cols = new ArrayList<HColumn<String, String>>();
 			
-		cols.add(HFactory.createColumn("book id", newBook.getId()));
+		cols.add(HFactory.createColumn("book id", String.valueOf(newBook.getId())));
 		cols.add(HFactory.createColumn("book title", newBook.getTitle()));
 		cols.add(HFactory.createColumn("book author", newBook.getAuthor()));
 		cols.add(HFactory.createColumn("book genre", newBook.getGenre()));
 		byte[] toWrap = new byte[newBook.getText().available()];newBook.getText().read(toWrap);
-		cols.add(HFactory.createColumn("book text", toWrap));
+		cols.add(HFactory.createColumn("book text", new String(toWrap)));
 
 		return cols;
 	}
 	
-	public Book row2book(List<Column> book){
+	public Book row2book(List<HColumn<String, String>> book){
 		
 		Book newBook = Book.getInstance();
-		
-		for(Column col: book){
-			if(new String(col.getName()).equals("id")){
-				
-				newBook.setId(Integer.parseInt(new String(col.getValue())));
-			}
+		for(HColumn<String, String> col: book){
+			if(new String(col.getNameBytes().array()).equals("book id")){
 			
-			if(new String(col.getName()).equals("title")){
-				
-				newBook.setTitle(new String(col.getValue()));
-			}
+				newBook.setId(Integer.parseInt(new String(col.getValueBytes().array())));			}
 			
-			if(new String(col.getName()).equals("author")){
+			if(new String(col.getNameBytes().array()).equals("book title")){
 				
-				newBook.setAuthor(new String(col.getValue()));
-			}
+				newBook.setTitle(new String(col.getValueBytes().array()));			}
 			
-			if(new String(col.getName()).equals("genre")){
+			if(new String(col.getNameBytes().array()).equals("book author")){
 				
-				newBook.setGenre(new String(col.getValue()));
-			}
+				newBook.setAuthor(new String(col.getValueBytes().array()));			}
 			
-			if(new String(col.getName()).equals("text")){
+			if(new String(col.getNameBytes().array()).equals("book genre")){
 				
-				InputStream is = new ByteArrayInputStream(col.getValue());
-				newBook.setText(is);
-			}
+				newBook.setGenre(new String(col.getValueBytes().array()));			}
+			
+			if(new String(col.getNameBytes().array()).equals("book text")){
+				
+				InputStream is =new ByteArrayInputStream(col.getValueBytes().array()); 
+				newBook.setText(is);												
+																					}
 		}
-		return newBook;
-	}
-	
-	public List<String> getBookTokens(){
 		
-		List<String> book = new ArrayList<String>();
-		book.add("id");book.add("title");book.add("author");book.add("genre");book.add("text");
-		return book;
+		return newBook;
 	}
 	
 }

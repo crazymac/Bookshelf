@@ -75,7 +75,7 @@ public class DAOApp implements DAO{
 		
 		QueryResult<OrderedRows<String, String, String>> result = books.execute();
         OrderedRows<String, String, String> orderedRows = result.get();
-        for(Row<String, String, String> row:orderedRows.getList()){
+        for(Row<String, String, String> row:orderedRows.getList().subList(pageSize*(pageNum-1), pageSize*pageNum)){
         	pagedBooks.add(BookConverter.getInstance().row2book(row.getColumnSlice().getColumns()));
         }        
 		return pagedBooks;

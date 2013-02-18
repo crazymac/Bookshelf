@@ -37,6 +37,10 @@ public class getRangedSliceTest {
 			}
 			after = dao.getAllBooks(1, 40);
 			Assert.assertFalse(before.equals(after));
+			after = dao.getAllBooks(2, 20);
+			Assert.assertFalse(before.equals(after));
+			after = dao.getAllBooks(3, 11);
+			Assert.assertFalse(before.equals(after));
 		} catch (FileNotFoundException | DAOException e) {e.printStackTrace();}
 	}
 }

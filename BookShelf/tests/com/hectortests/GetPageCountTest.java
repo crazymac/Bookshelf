@@ -1,4 +1,4 @@
-package com.hectorbookshelftests;
+package com.hectortests;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

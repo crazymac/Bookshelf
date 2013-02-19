@@ -24,6 +24,7 @@ public class DAOApp implements DAO{
 	private Cluster clstr;
 	private Keyspace ksOper;
 	private BasicColumnFamilyDefinition CfDef;
+	private int bookID;
 	
 	public DAOApp(){
 		
@@ -41,17 +42,22 @@ public class DAOApp implements DAO{
 		CfDef.setKeyspaceName(Constants.KEYSPACE_NAME);
 		CfDef.setName(Constants.CF_NAME);
         clstr.addColumnFamily(CfDef);
+        
+        
+        bookID= 0;
 	}
 
 	@Override
 	public int addBook(Book book) throws DAOException {
 		
+		book.setId(bookID);
 		try{
 			Mutator<String> mutator = HFactory.createMutator(ksOper, StringSerializer.get());
 			for(HColumn<String, String> col: BookConverter.getInstance().book2row(book))
 				mutator.insert("book "+ String.valueOf(book.getId()), Constants.CF_NAME, col);
 		}catch (HectorException | IOException e) {
             e.printStackTrace();}
+		bookID++;
 		return book.getId();
 	}
 

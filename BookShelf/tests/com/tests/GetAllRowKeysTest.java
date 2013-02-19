@@ -1,7 +1,8 @@
-package com.hectortests;
+package com.tests;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -9,15 +10,14 @@ import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
-import com.hectorbookshelf.Book;
-import com.hectorbookshelf.Constants;
-import com.hectorbookshelf.DAOApp;
-import com.hectorbookshelf.DAOException;
+import com.dao.Book;
+import com.dao.Constants;
+import com.dao.DAOApp;
 
-public class GetPageCountTest {
-
+public class GetAllRowKeysTest {
+	
 	@Test
-	public void getPagesCountTest(){
+	public void getIterList(){
 		
 		BasicConfigurator.configure();
 		Cluster clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
@@ -29,10 +29,12 @@ public class GetPageCountTest {
 			for(int i = 0; i< 40; ++i){
 				
 				beggining_state.newBook(i, new String("CassandraTest" + String.valueOf(i)), new String("Test" + String.valueOf(i)), new String("Tester" + String.valueOf(i)), new FileInputStream("resources/testbook"));
-				dao.addBook(beggining_state);
 			}
-			System.out.println(dao.getPageCount(20));
-			
-		} catch (FileNotFoundException | DAOException e) {e.printStackTrace();}
+			List<String> keys = dao.getAllRowKeys();
+			for(String key: keys){
+				System.out.println(key);
+			}
+		} catch (FileNotFoundException e) {e.printStackTrace();}
 	}
+
 }

@@ -1,4 +1,4 @@
-package com.hectorbookshelf;
+package com.dao;
 
 public class Constants {
 

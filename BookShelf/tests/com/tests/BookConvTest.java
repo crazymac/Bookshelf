@@ -1,4 +1,4 @@
-package com.hectortests;
+package com.tests;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -7,7 +7,8 @@ import java.util.List;
 import junit.framework.Assert;
 import me.prettyprint.hector.api.beans.HColumn;
 import org.junit.Test;
-import com.hectorbookshelf.*;
+
+import com.dao.*;
 
 public class BookConvTest {
 

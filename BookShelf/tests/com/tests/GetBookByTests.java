@@ -1,4 +1,4 @@
-package com.hectortests;
+package com.tests;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,10 +10,10 @@ import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
-import com.hectorbookshelf.Book;
-import com.hectorbookshelf.Constants;
-import com.hectorbookshelf.DAOApp;
-import com.hectorbookshelf.DAOException;
+import com.dao.Book;
+import com.dao.Constants;
+import com.dao.DAOApp;
+import com.dao.DAOException;
 
 public class GetBookByTests {
 	

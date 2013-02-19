@@ -4,8 +4,8 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hectorbookshelf.Book;
-import com.hectorbookshelf.DAOApp;
+import com.dao.Book;
+import com.dao.DAOApp;
 
 public class Main {
 

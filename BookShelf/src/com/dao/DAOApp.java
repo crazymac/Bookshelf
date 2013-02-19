@@ -1,4 +1,4 @@
-package com.hectorbookshelf;
+package com.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -147,11 +147,19 @@ public class DAOApp implements DAO{
 		return booksByGenre;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public TreeSet<String> getAuthorByGenre(int pageNum, int pageSize,
 			String genre) throws DAOException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Book> books = getAllBooks(pageNum, pageSize);
+		List<Book> authorByGenre = new ArrayList<Book>();
+		TreeSet<String> authors = new TreeSet<String>();
+		for(Book book: books){
+			if(book.getGenre().equalsIgnoreCase(genre)){
+				authors.add(book.getAuthor());
+			}
+		}
+		return authors;
 	}
 
 	@Override

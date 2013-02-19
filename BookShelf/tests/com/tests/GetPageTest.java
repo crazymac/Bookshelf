@@ -1,4 +1,4 @@
-package com.hectortests;
+package com.tests;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,21 +8,23 @@ import java.util.List;
 import junit.framework.Assert;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
+
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
-import com.hectorbookshelf.Book;
-import com.hectorbookshelf.Constants;
-import com.hectorbookshelf.DAOApp;
-import com.hectorbookshelf.DAOException;
 
-public class GetRangedSliceTest {
+import com.dao.Book;
+import com.dao.Constants;
+import com.dao.DAOApp;
+import com.dao.DAOException;
 
+public class GetPageTest {
+
+	@SuppressWarnings("unused")
 	@Test
-	public void getRangedSlicesTest(){
+	public void getpagesTest() {
 		
 		BasicConfigurator.configure();
-		List<Book> before = new ArrayList<Book>();
-		List<Book> after = new ArrayList<Book>();
+		List<Book> pagedBookList = new ArrayList<Book>();
 		
 		Cluster clstr = HFactory.getOrCreateCluster(Constants.CLUSTER_NAME, Constants.HOST_DEF+":9160");
 		if(clstr.describeKeyspace(Constants.KEYSPACE_NAME) != null)
@@ -35,12 +37,12 @@ public class GetRangedSliceTest {
 				beggining_state.newBook(i, new String("CassandraTest" + String.valueOf(i)), new String("Test" + String.valueOf(i)), new String("Tester" + String.valueOf(i)), new FileInputStream("resources/testbook"));
 				dao.addBook(beggining_state);
 			}
-			after = dao.getAllBooks(1, 40);
-			Assert.assertFalse(before.equals(after));
-			after = dao.getAllBooks(2, 20);
-			Assert.assertFalse(before.equals(after));
-			after = dao.getAllBooks(3, 11);
-			Assert.assertFalse(before.equals(after));
+			
+			Assert.assertNotNull(dao.getAllBooks(2, 10));
+			Assert.assertEquals(dao.getAllBooks(2, 10).size(), 10);
+			
 		} catch (FileNotFoundException | DAOException e) {e.printStackTrace();}
 	}
+		
 }
+

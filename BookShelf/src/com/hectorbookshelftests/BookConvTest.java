@@ -9,7 +9,7 @@ import me.prettyprint.hector.api.beans.HColumn;
 import org.junit.Test;
 import com.hectorbookshelf.*;
 
-public class bookConvTest {
+public class BookConvTest {
 
 	public Book bstate;
 	public Book fstate;

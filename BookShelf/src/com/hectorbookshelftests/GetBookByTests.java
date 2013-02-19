@@ -15,7 +15,7 @@ import com.hectorbookshelf.Constants;
 import com.hectorbookshelf.DAOApp;
 import com.hectorbookshelf.DAOException;
 
-public class getBookByTests {
+public class GetBookByTests {
 	
 	public Book bstate;
 	public Book fstate;

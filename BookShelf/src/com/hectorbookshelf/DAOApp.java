@@ -2,6 +2,7 @@ package com.hectorbookshelf;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
@@ -65,20 +66,20 @@ public class DAOApp implements DAO{
 	public List<Book> getAllBooks(int pageNum, int pageSize)
 			throws DAOException {
 		
-		List<Book> pagedBooks = new ArrayList<Book>();
-		
-		RangeSlicesQuery<String, String, String> books = HFactory.createRangeSlicesQuery(ksOper, StringSerializer.get(), StringSerializer.get(), StringSerializer.get()); 
-		books.setColumnFamily(CfDef.getName());
-		books.setKeys("", "");
-		books.setRange("", "", false, 1000);
-		books.setRowCount(pageSize*pageNum);
-		
-		QueryResult<OrderedRows<String, String, String>> result = books.execute();
-        OrderedRows<String, String, String> orderedRows = result.get();
-        for(Row<String, String, String> row:orderedRows.getList().subList(pageSize*(pageNum-1), pageSize*pageNum)){
-        	pagedBooks.add(BookConverter.getInstance().row2book(row.getColumnSlice().getColumns()));
-        }        
-		return pagedBooks;
+		List<String> keys = getAllRowKeys();
+		if(pageNum <0 ||pageNum > getPageCount(pageSize)){
+			return null;
+		}
+		else{
+			if(pageNum*pageSize > keys.size()){
+				List<String> neededKeys = getAllRowKeys().subList((pageNum-1)*pageSize, keys.size());
+				return getBooks(neededKeys);
+			}
+			else{
+				List<String> neededKeys = getAllRowKeys().subList((pageNum-1)*pageSize, pageNum*pageSize);
+				return getBooks(neededKeys);
+			}
+		}
 	}
 
 	@Override
@@ -149,8 +150,53 @@ public class DAOApp implements DAO{
 
 	@Override
 	public void closeConnection() throws DAOException {
-		// TODO Auto-generated method stub
+		clstr.getConnectionManager().shutdown();
 		
 	}
+	
+	public List<String> getAllRowKeys(){
+		
 
+		List<String> pagedBooks = new ArrayList<String>();
+		
+		RangeSlicesQuery<String, String, String> books = HFactory.createRangeSlicesQuery(ksOper, StringSerializer.get(), StringSerializer.get(), StringSerializer.get()); 
+		books.setColumnFamily(CfDef.getName());
+		books.setKeys("", "");
+		books.setReturnKeysOnly();
+		
+		QueryResult<OrderedRows<String, String, String>> result = books.execute();
+        OrderedRows<String, String, String> orderedRows = result.get();
+        Iterator<Row<String, String, String>> it = orderedRows.getList().iterator();
+        while(it.hasNext()){
+        	pagedBooks.add(it.next().getKey());
+        }        
+		return pagedBooks;
+	}
+
+	public int getPageCount(int pageSize){
+		
+		int pages = getAllRowKeys().size()/pageSize;
+		if(getAllRowKeys().size()%pageSize != 0)
+			return pages+1;
+		else
+			return pages;
+	}
+	
+	public List<Book> getBooks(List<String> rowKeys){
+		
+		List<Book> booksByKeys = new ArrayList<Book>();
+		RangeSlicesQuery<String, String, String> books = HFactory.createRangeSlicesQuery(ksOper, StringSerializer.get(), StringSerializer.get(), StringSerializer.get()); 
+		books.setColumnFamily(CfDef.getName());
+		books.setKeys(rowKeys.get(0), rowKeys.get(rowKeys.size()-1));
+		books.setRange("", "", false, 5);
+		books.setRowCount(rowKeys.size());
+		
+		QueryResult<OrderedRows<String, String, String>> result = books.execute();
+        OrderedRows<String, String, String> orderedRows = result.get();
+        for(Row<String, String, String> row:orderedRows.getList()){
+        	booksByKeys.add(BookConverter.getInstance().row2book(row.getColumnSlice().getColumns()));
+        }        
+		return booksByKeys;
+	}
+	
 }
